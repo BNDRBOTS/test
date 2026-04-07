@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Drawer Scroll Test - Standalone</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bone: #E8E4DF;
+            --void: #020202;
+            --charcoal: #0A0A0B;
+            --plasma: #CCFF00;
+            --magenta: #ff0055;
+            --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        body {
+            background: var(--bone);
+            font-family: 'Inter', -apple-system, sans-serif;
+            min-height: 200vh; /* force page scroll to test body lock */
+        }
+        .page-content {
+            padding: 40px;
+            text-align: center;
+        }
+        .open-drawer-btn {
+            background: var(--void);
+            color: var(--bone);
+            border: none;
+            padding: 16px 32px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 40px;
+            margin-top: 100px;
+        }
+        /* --- EXACT DRAWER STYLES FROM ORIGINAL (no changes) --- */
+        .drawer-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100dvh;
+            background: rgba(2, 2, 2, 0.6);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            z-index: 1400; opacity: 0; pointer-events: none;
+            transition: opacity 0.5s var(--ease-premium);
+        }
+        .drawer-overlay.active { opacity: 1; pointer-events: auto; touch-action: none; }
+        .drawer {
+            position: fixed; top: 0; right: 0; width: 100%; max-width: 520px;
+            height: 100vh; height: 100dvh;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(60px) saturate(200%);
+            -webkit-backdrop-filter: blur(60px) saturate(200%);
+            z-index: 1500; overflow: hidden; display: flex; flex-direction: column;
+            transform: translateX(100%); transition: transform 0.6s var(--ease-premium);
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--bone);
+            box-shadow: -20px 0 60px rgba(0,0,0,0.3);
+        }
+        .drawer.active { transform: translateX(0); }
+        .drawer-scroll {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            touch-action: pan-y;
+            padding: 96px max(32px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(32px, env(safe-area-inset-left));
+        }
+        @media (max-width: 539px) {
+            .drawer { max-width: 100%; }
+            .drawer-scroll { padding: 80px max(24px, env(safe-area-inset-right)) max(40px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); }
+        }
+        .drawer-close {
+            position: absolute; top: max(32px, env(safe-area-inset-top)); right: max(32px, env(safe-area-inset-right));
+            background: none; border: none; font-size: 36px; color: var(--bone); cursor: pointer;
+            opacity: 0.5; transition: all 0.3s var(--ease-premium);
+            width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; z-index: 2;
+        }
+        .drawer-close:hover { opacity: 1; color: var(--plasma); transform: rotate(90deg); background: rgba(255,255,255,0.05); }
+        /* section-badge and card styles (exact) */
+        .section-header { display: flex; align-items: center; margin-bottom: 40px; width: 100%; }
+        .section-header::after { content: ''; flex-grow: 1; height: 1px; background: linear-gradient(90deg, rgba(232,228,223,0.12) 0%, transparent 100%); margin-left: 24px; }
+        .section-badge {
+            position: relative; display: inline-flex; align-items: center; gap: 12px;
+            padding: 10px 24px 10px 18px; font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+            text-transform: uppercase; color: var(--bone); z-index: 1; border-radius: 4px;
+        }
+        .section-badge::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--void); transform: skewX(-12deg); z-index: -1; border-radius: 3px;
+            box-shadow: 0 8px 20px -4px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08);
+        }
+        .section-badge::after {
+            content: ''; width: 6px; height: 6px; background: var(--plasma); border-radius: 50%;
+            box-shadow: 0 0 12px rgba(204,255,0,0.5); order: -1; animation: plasma-pulse 3s infinite ease-in-out;
+        }
+        @keyframes plasma-pulse { 0%,100%{box-shadow:0 0 12px rgba(204,255,0,0.4);opacity:1;}50%{box-shadow:0 0 24px rgba(204,255,0,0.8);opacity:0.6;} }
+        .lead-text { font-size: clamp(28px, 5vw, 44px); font-weight: 700; line-height: 1.15; margin-bottom: 32px; letter-spacing: -0.02em; color: var(--bone); }
+        .pricing-drawer-grid { display: grid; gap: 24px; }
+        .pricing-card-mini {
+            background: rgba(2,2,2,0.4); color: var(--bone); padding: 32px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08); position: relative;
+            transition: all 0.4s var(--ease-premium);
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 40px -10px rgba(0,0,0,0.8);
+        }
+        .pricing-card-mini h3 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+        .pricing-card-mini .price-tag { font-size: 40px; font-weight: 800; line-height: 1; margin-bottom: 24px; color: var(--plasma); text-shadow: 0 0 16px rgba(204,255,0,0.2); }
+        .pricing-card-mini .price-tag span { font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 500; color: rgba(255,255,255,0.4); vertical-align: middle; margin-left: 4px; }
+        .feature-list { list-style: none; margin-bottom: 32px; }
+        .feature-list li { font-size: 15px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 12px; color: rgba(232,228,223,0.85); line-height: 1.5; }
+        .feature-list li::before { content: '✓'; color: var(--plasma); font-weight: 800; font-size: 14px; }
+        .btn-primary {
+            display: block; width: 100%; background: var(--plasma); color: var(--void); text-align: center;
+            padding: 20px 32px; font-size: 12px; font-family: 'Outfit', sans-serif; font-weight: 800;
+            letter-spacing: 0.15em; text-transform: uppercase; text-decoration: none; border: none;
+            border-radius: 12px; cursor: pointer; transition: all 0.4s var(--ease-premium);
+            box-shadow: 0 8px 24px -8px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        .btn-primary:hover { background: #e5ff66; transform: translateY(-3px); }
+        .archive-drawer-grid { display: grid; gap: 24px; }
+        .archive-category {
+            background: rgba(2,2,2,0.4); padding: 32px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .archive-list { list-style: none; }
+        .archive-list li a {
+            display: flex; justify-content: space-between; align-items: center;
+            color: rgba(232,228,223,0.75); text-decoration: none; font-size: 15px;
+            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: all 0.3s;
+        }
+        .archive-list li a::after { content: '↗'; font-size: 13px; color: var(--plasma); opacity: 0; transform: translateX(-16px); transition: all 0.4s; }
+        .archive-list li a:hover::after { opacity: 1; transform: translateX(0); }
+        .archive-list li a:hover { color: var(--plasma); padding-left: 12px; }
+    </style>
+</head>
+<body>
+    <div class="page-content">
+        <button class="open-drawer-btn" id="openPricingDrawer">Open Pricing Drawer (with links/cards)</button>
+        <button class="open-drawer-btn" id="openArchiveDrawer" style="margin-left: 20px;">Open Archive Drawer (with links)</button>
+        <p style="margin-top: 40px;">Test on iOS: touch a link/card and drag vertically. Does it scroll?<br>Touch the background (padding area) and drag. Does it scroll?<br>The difference tells you where the bug lives.</p>
+    </div>
+
+    <div id="drawer-overlay" class="drawer-overlay"></div>
+
+    <!-- PRICING DRAWER (exact copy from original) -->
+    <aside id="pricing-drawer" class="drawer">
+        <button class="drawer-close" aria-label="Close">&times;</button>
+        <div class="drawer-scroll">
+            <div class="section-header"><div class="section-badge">The Offer</div></div>
+            <h2 class="lead-text">One partner.<br>Unlimited builds.</h2>
+            <div class="pricing-drawer-grid">
+                <div class="pricing-card-mini">
+                    <div class="section-header"><div class="section-badge">Standard</div></div>
+                    <h3>One-Page Lander™</h3>
+                    <div class="price-tag">$750</div>
+                    <ul class="feature-list"><li>Custom one-page site</li><li>1 light revision</li></ul>
+                    <a href="https://buy.stripe.com/7sY28r88b9kudoobeU0oM0c" target="_blank" class="btn-primary">Start Project</a>
+                </div>
+                <div class="pricing-card-mini">
+                    <div class="section-header"><div class="section-badge">Expanded</div></div>
+                    <h3>Three-Page Custom™</h3>
+                    <div class="price-tag">$1,500<span>.00</span></div>
+                    <ul class="feature-list"><li>Custom three-page site</li><li>2 light revisions</li></ul>
+                    <a href="https://buy.stripe.com/8x2cN5fADeEOfww0Ag0oM0d" target="_blank" class="btn-primary">Start Project</a>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ARCHIVE DRAWER (exact copy from original, shortened for brevity but includes links) -->
+    <aside id="archive-drawer" class="drawer">
+        <button class="drawer-close" aria-label="Close">&times;</button>
+        <div class="drawer-scroll">
+            <div class="section-header"><div class="section-badge">The Archive</div></div>
+            <div class="archive-drawer-grid">
+                <div class="archive-category">
+                    <div class="section-header"><div class="section-badge">Core</div></div>
+                    <ul class="archive-list">
+                        <li><a href="https://bndrbots.github.io/BNDR_LifeMatrix/">LifeMatrix</a></li>
+                        <li><a href="https://bndrbots.github.io/Studio/">Studio</a></li>
+                        <li><a href="https://bndrbots.github.io/Voss/">Voss</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <script>
+        // Exact SurfaceController logic from original (no Three.js, no extra listeners)
+        const SurfaceController = {
+            activeSurface: null,
+            lastFocus: null,
+            init() {
+                document.querySelectorAll('.drawer-close, .drawer-overlay').forEach(el => {
+                    el.addEventListener('click', (e) => {
+                        if (e.target === el || e.currentTarget.classList.contains('drawer-close')) {
+                            this.close();
+                        }
+                    });
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.activeSurface) this.close();
+                });
+            },
+            open(surfaceId, triggerBtn) {
+                if (this.activeSurface) this.close();
+                this.activeSurface = document.getElementById(surfaceId);
+                if (!this.activeSurface) return;
+                this.lastFocus = triggerBtn || document.activeElement;
+                this.activeSurface.classList.add('active');
+                const overlay = document.getElementById('drawer-overlay');
+                if (overlay) overlay.classList.add('active');
+                const scrollY = window.scrollY;
+                document.documentElement.style.overflow = 'hidden';
+                document.body.style.overflow = 'hidden';
+                document.body.style.position = 'fixed';
+                document.body.style.top = `-${scrollY}px`;
+                document.body.style.width = '100%';
+                document.body.dataset.scrollY = scrollY;
+                const firstFocusable = this.activeSurface.querySelector('button, a');
+                if (firstFocusable) setTimeout(() => firstFocusable.focus(), 50);
+            },
+            close() {
+                if (!this.activeSurface) return;
+                const scrollY = document.body.dataset.scrollY;
+                document.documentElement.style.overflow = '';
+                document.body.style.overflow = '';
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
+                if (scrollY) window.scrollTo(0, parseInt(scrollY || '0'));
+                this.activeSurface.classList.remove('active');
+                const overlay = document.getElementById('drawer-overlay');
+                if (overlay) overlay.classList.remove('active');
+                if (this.lastFocus && this.lastFocus.focus) this.lastFocus.focus();
+                this.activeSurface = null;
+            }
+        };
+        SurfaceController.init();
+        document.getElementById('openPricingDrawer').addEventListener('click', () => SurfaceController.open('pricing-drawer', document.getElementById('openPricingDrawer')));
+        document.getElementById('openArchiveDrawer').addEventListener('click', () => SurfaceController.open('archive-drawer', document.getElementById('openArchiveDrawer')));
+    </script>
+</body>
+</html>
