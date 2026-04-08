@@ -12,8 +12,12 @@
         /* --- RESET & TOKENS --- */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
         
-        /* Enforce instant touch response universally and disable native drag hijacking */
-        a, button, summary { touch-action: manipulation; -webkit-user-drag: none; }
+        /* Enforce instant touch response universally and rigidly disable native drag hijacking globally */
+        a, button, summary, img, .pricing-card-mini, .archive-category { 
+            touch-action: manipulation; 
+            -webkit-user-drag: none; 
+            -webkit-touch-callout: none;
+        }
         input, textarea { touch-action: manipulation; }
 
         /* Guarantee Jobs-level touch targets on all touch devices without breaking desktop layout */
@@ -324,7 +328,7 @@
             background: rgba(10, 10, 11, 0.85);
             backdrop-filter: blur(32px) saturate(180%);
             -webkit-backdrop-filter: blur(32px) saturate(180%);
-            z-index: 1500; overflow: hidden; display: flex; flex-direction: column;
+            z-index: 1500; overflow: hidden; display: block; /* Bypassing flexbox for the root container */
             transform: translateX(100%); transition: transform 0.6s var(--ease-premium);
             border-left: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--bone);
@@ -333,11 +337,13 @@
         }
 
         .drawer-scroll {
-            flex: 1 1 auto;
-            min-height: 0;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%; height: 100%;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            user-select: none;
+            touch-action: pan-y;
+            user-select: none; /* prevents selection during drag, allows scroll capture */
             padding: 96px max(32px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(32px, env(safe-area-inset-left));
         }
 
@@ -355,6 +361,7 @@
         .drawer-scroll button {
             -webkit-tap-highlight-color: transparent;
             -webkit-user-drag: none;
+            touch-action: pan-y;
         }
 
         .drawer.active { transform: translateX(0); }
@@ -377,12 +384,12 @@
         .pricing-card-mini {
             background: rgba(2, 2, 2, 0.6); color: var(--bone); padding: 32px; border-radius: 16px;
             border: 1px solid rgba(255,255,255,0.12); position: relative; isolation: isolate;
-            transition: all 0.4s var(--ease-premium);
+            transition: border-color 0.4s var(--ease-premium), background-color 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium);
             box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 40px -10px rgba(0,0,0,0.5);
             height: 100%; display: flex; flex-direction: column;
-            -webkit-user-drag: none;
+            touch-action: pan-y;
         }
-        @media (hover: hover) { .pricing-card-mini:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.3); background: rgba(10, 10, 11, 0.85); } }
+        @media (hover: hover) { .pricing-card-mini:hover { border-color: rgba(255,255,255,0.3); background: rgba(10, 10, 11, 0.85); } }
         .pricing-card-mini.tier-special { border-color: rgba(255, 0, 85, 0.6); box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 16px 40px rgba(255, 0, 85, 0.15); }
         .pricing-card-mini.tier-sub { border-color: rgba(204, 255, 0, 0.4); }
         .pricing-card-mini h3 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
@@ -398,10 +405,11 @@
         .archive-drawer-grid { display: grid; gap: 28px; align-items: stretch; }
         .archive-category {
             background: rgba(2, 2, 2, 0.6); color: var(--bone); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 32px;
-            position: relative; isolation: isolate; transition: all 0.4s var(--ease-premium);
+            position: relative; isolation: isolate; 
+            transition: border-color 0.4s var(--ease-premium), background-color 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium);
             box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 40px -10px rgba(0,0,0,0.5);
             height: 100%; display: flex; flex-direction: column;
-            -webkit-user-drag: none;
+            touch-action: pan-y;
         }
         @media (hover: hover) { .archive-category:hover { border-color: rgba(255,255,255,0.3); background: rgba(10, 10, 11, 0.85); } }
         .archive-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
