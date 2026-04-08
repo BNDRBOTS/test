@@ -328,7 +328,7 @@
             background: rgba(10, 10, 11, 0.85);
             backdrop-filter: blur(32px) saturate(180%);
             -webkit-backdrop-filter: blur(32px) saturate(180%);
-            z-index: 1500; overflow: hidden; display: block; /* Bypassing flexbox for the root container */
+            z-index: 1500; overflow: hidden; display: flex; flex-direction: column;
             transform: translateX(100%); transition: transform 0.6s var(--ease-premium);
             border-left: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--bone);
@@ -337,13 +337,12 @@
         }
 
         .drawer-scroll {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            width: 100%; height: 100%;
+            flex: 1 1 auto;
+            min-height: 0;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             touch-action: pan-y;
-            user-select: none; /* prevents selection during drag, allows scroll capture */
+            user-select: none;
             padding: 96px max(32px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(32px, env(safe-area-inset-left));
         }
 
@@ -383,7 +382,8 @@
         .pricing-drawer-grid { display: grid; gap: 28px; align-items: stretch; }
         .pricing-card-mini {
             background: rgba(2, 2, 2, 0.6); color: var(--bone); padding: 32px; border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.12); position: relative; isolation: isolate;
+            border: 1px solid rgba(255,255,255,0.12); position: relative; 
+            z-index: 1;
             transition: border-color 0.4s var(--ease-premium), background-color 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium);
             box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 40px -10px rgba(0,0,0,0.5);
             height: 100%; display: flex; flex-direction: column;
@@ -395,7 +395,7 @@
         .pricing-card-mini h3 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
         .pricing-card-mini .price-tag { font-size: 40px; font-weight: 800; line-height: 1; margin-bottom: 24px; color: var(--plasma); text-shadow: 0 0 16px rgba(204, 255, 0, 0.2); }
         .pricing-card-mini.tier-special .price-tag { color: var(--magenta); text-shadow: 0 0 16px rgba(255, 0, 85, 0.25); }
-        .pricing-card-mini .price-tag span { font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 500; color: rgba(255,255,255,0.4); text-shadow: none; vertical-align: middle; margin-left: 4px; }   
+        .pricing-card-mini .price-tag span { font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 500; color: rgba(255,255,255,0.4); text-shadow: none; vertical-align: super; margin-left: 4px; }   
         .pricing-card-mini .feature-list { list-style: none; margin-bottom: 32px; flex-grow: 1; }
         .pricing-card-mini .feature-list li { font-size: 15px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 12px; color: rgba(232, 228, 223, 0.85); line-height: 1.5; }
         .pricing-card-mini .feature-list li::before { content: '✓'; color: var(--plasma); font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 14px; }
@@ -405,7 +405,8 @@
         .archive-drawer-grid { display: grid; gap: 28px; align-items: stretch; }
         .archive-category {
             background: rgba(2, 2, 2, 0.6); color: var(--bone); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 32px;
-            position: relative; isolation: isolate; 
+            position: relative; 
+            z-index: 1; 
             transition: border-color 0.4s var(--ease-premium), background-color 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium);
             box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 40px -10px rgba(0,0,0,0.5);
             height: 100%; display: flex; flex-direction: column;
