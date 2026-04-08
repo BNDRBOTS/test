@@ -2,60 +2,75 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Drawer Scroll Test - Standalone</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+    <title>Drawer Scroll Test</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* --- RESET & TOKENS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+        
+        /* Enforce instant touch response universally */
+        a, button, input, textarea, summary { touch-action: manipulation; }
+
         :root {
-            --bone: #E8E4DF;
-            --void: #020202;
-            --charcoal: #0A0A0B;
-            --plasma: #CCFF00;
+            --bone: #E8E4DF;       
+            --void: #020202;       
+            --charcoal: #0A0A0B;   
+            --plasma: #CCFF00;     
             --magenta: #ff0055;
             --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
             --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+            --radius-soft: 16px;
+            --radius-pill: 99px;
+        }
+        html {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+            position: relative;
         }
         body {
-            background: var(--bone);
-            font-family: 'Inter', -apple-system, sans-serif;
-            min-height: 200vh; /* force page scroll to test body lock */
+            background-color: var(--bone);
+            background-image: radial-gradient(circle at 50% 50%, var(--bone) 0%, #D5CFC6 100%);
+            color: var(--void);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+            position: relative;
+            letter-spacing: -0.01em;
         }
-        .page-content {
-            padding: 40px;
-            text-align: center;
+        h1, h2, h3, .section-badge, .price-tag, .connect-btn, .footer-policy-links a {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: -0.01em;
         }
-        .open-drawer-btn {
-            background: var(--void);
-            color: var(--bone);
-            border: none;
-            padding: 16px 32px;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 40px;
-            margin-top: 100px;
-        }
-        /* --- EXACT DRAWER STYLES FROM ORIGINAL (no changes) --- */
+        @media (pointer: fine) { body { cursor: crosshair; } }
+        
+        /* --- DRAWERS (SIDE PANELS) --- */
         .drawer-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100dvh;
-            background: rgba(2, 2, 2, 0.6);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            z-index: 1400; opacity: 0; pointer-events: none;
-            transition: opacity 0.5s var(--ease-premium);
+            background: rgba(2, 2, 2, 0.4); 
+            backdrop-filter: blur(8px); 
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1400; opacity: 0; pointer-events: none; transition: opacity 0.5s var(--ease-premium);
         }
         .drawer-overlay.active { opacity: 1; pointer-events: auto; touch-action: none; }
+        
         .drawer {
-            position: fixed; top: 0; right: 0; width: 100%; max-width: 520px;
-            height: 100vh; height: 100dvh;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(60px) saturate(200%);
-            -webkit-backdrop-filter: blur(60px) saturate(200%);
+            position: fixed; top: 0; right: 0; width: 100%; max-width: 520px; height: 100vh; height: 100dvh;
+            background: rgba(10, 10, 11, 0.85);
+            backdrop-filter: blur(32px) saturate(180%);
+            -webkit-backdrop-filter: blur(32px) saturate(180%);
             z-index: 1500; overflow: hidden; display: flex; flex-direction: column;
             transform: translateX(100%); transition: transform 0.6s var(--ease-premium);
-            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--bone);
-            box-shadow: -20px 0 60px rgba(0,0,0,0.3);
+            box-shadow: -20px 0 60px rgba(0,0,0,0.4);
+            will-change: transform;
         }
-        .drawer.active { transform: translateX(0); }
+
         .drawer-scroll {
             flex: 1 1 auto;
             min-height: 0;
@@ -63,183 +78,346 @@
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
             touch-action: pan-y;
+            user-select: none; /* prevents selection during drag, allows scroll capture */
             padding: 96px max(32px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(32px, env(safe-area-inset-left));
         }
-        @media (max-width: 539px) {
-            .drawer { max-width: 100%; }
-            .drawer-scroll { padding: 80px max(24px, env(safe-area-inset-right)) max(40px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); }
+
+        /* Re-enable selection only for actual text on long-press */
+        .drawer-scroll p,
+        .drawer-scroll li,
+        .drawer-scroll h2,
+        .drawer-scroll h3,
+        .drawer-scroll .lead-text,
+        .drawer-scroll .body-text {
+            user-select: text;
+            -webkit-touch-callout: default;
         }
+
+        /* Kill tap highlight on cards so they don't compete */
+        .drawer-scroll .pricing-card-mini,
+        .drawer-scroll .archive-category,
+        .drawer-scroll .archive-list li a,
+        .drawer-scroll .btn-primary {
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer; /* preserves clickability */
+        }
+
+        .drawer.active { transform: translateX(0); }
+
         .drawer-close {
-            position: absolute; top: max(32px, env(safe-area-inset-top)); right: max(32px, env(safe-area-inset-right));
-            background: none; border: none; font-size: 36px; color: var(--bone); cursor: pointer;
-            opacity: 0.5; transition: all 0.3s var(--ease-premium);
-            width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; z-index: 2;
+            position: absolute; top: max(32px, env(safe-area-inset-top, 32px)); right: max(32px, env(safe-area-inset-right, 32px));
+            background: rgba(255, 255, 255, 0.05); border: none; font-size: 32px;
+            color: var(--bone); cursor: pointer; opacity: 0.8;
+            transition: all 0.3s var(--ease-premium);
+            width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%;
+            z-index: 10;
         }
-        .drawer-close:hover { opacity: 1; color: var(--plasma); transform: rotate(90deg); background: rgba(255,255,255,0.05); }
-        /* section-badge and card styles (exact) */
+        .drawer-close:focus-visible, .drawer-close:active {
+            opacity: 1; outline: none; color: var(--plasma); transform: rotate(90deg); background: rgba(255, 255, 255, 0.15);
+        }
+        @media (hover: hover) { .drawer-close:hover { opacity: 1; color: var(--plasma); transform: rotate(90deg); background: rgba(255, 255, 255, 0.15); } }
+        
+        /* --- PRICING CARDS --- */
+        .pricing-drawer-grid { display: grid; gap: 28px; align-items: stretch; }
+        .pricing-card-mini {
+            background: rgba(2, 2, 2, 0.6); color: var(--bone); padding: 32px; border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.12); position: relative;
+            transition: all 0.4s var(--ease-premium);
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 40px -10px rgba(0,0,0,0.5);
+            z-index: 1; height: 100%; display: flex; flex-direction: column;
+        }
+        @media (hover: hover) { .pricing-card-mini:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.3); background: rgba(10, 10, 11, 0.85); } }
+        .pricing-card-mini.tier-special { border-color: rgba(255, 0, 85, 0.6); box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 16px 40px rgba(255, 0, 85, 0.15); }
+        .pricing-card-mini.tier-sub { border-color: rgba(204, 255, 0, 0.4); }
+        .pricing-card-mini h3 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+        .pricing-card-mini .price-tag { font-size: 40px; font-weight: 800; line-height: 1; margin-bottom: 24px; color: var(--plasma); text-shadow: 0 0 16px rgba(204, 255, 0, 0.2); }
+        .pricing-card-mini.tier-special .price-tag { color: var(--magenta); text-shadow: 0 0 16px rgba(255, 0, 85, 0.25); }
+        .pricing-card-mini .price-tag span { font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 500; color: rgba(255,255,255,0.4); text-shadow: none; vertical-align: middle; margin-left: 4px; }   
+        .pricing-card-mini .feature-list { list-style: none; margin-bottom: 32px; flex-grow: 1; }
+        .pricing-card-mini .feature-list li { font-size: 15px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 12px; color: rgba(232, 228, 223, 0.85); line-height: 1.5; }
+        .pricing-card-mini .feature-list li::before { content: '✓'; color: var(--plasma); font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 14px; }
+        .pricing-card-mini.tier-special .feature-list li::before { color: var(--magenta); }
+        
+        /* --- ARCHIVE CARDS --- */
+        .archive-drawer-grid { display: grid; gap: 28px; align-items: stretch; }
+        .archive-category {
+            background: rgba(2, 2, 2, 0.6); color: var(--bone); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 32px;
+            position: relative; transition: all 0.4s var(--ease-premium);
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 40px -10px rgba(0,0,0,0.5);
+            z-index: 1; height: 100%; display: flex; flex-direction: column;
+        }
+        @media (hover: hover) { .archive-category:hover { border-color: rgba(255,255,255,0.3); background: rgba(10, 10, 11, 0.85); } }
+        .archive-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+        .archive-list li a {
+            display: flex; justify-content: space-between; align-items: center; color: rgba(232, 228, 223, 0.85);
+            text-decoration: none; font-size: 15px; font-weight: 500; padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06); transition: all 0.3s var(--ease-premium); position: relative;
+            min-height: 48px;
+        }
+        .archive-list li a::after { content: '↗'; font-size: 13px; color: var(--plasma); opacity: 0; transform: translateX(-16px); transition: all 0.4s var(--ease-premium); }
+        .archive-list li a:focus-visible, .archive-list li a:active { color: var(--plasma); padding-left: 12px; border-bottom-color: rgba(204, 255, 0, 0.4); outline: none; background: linear-gradient(90deg, rgba(204,255,0,0.08) 0%, transparent 100%); }
+        .archive-list li a:focus-visible::after, .archive-list li a:active::after { opacity: 1; transform: translateX(0); }
+        @media (hover: hover) {
+            .archive-list li a:hover { color: var(--plasma); padding-left: 12px; border-bottom-color: rgba(204, 255, 0, 0.4); outline: none; background: linear-gradient(90deg, rgba(204,255,0,0.08) 0%, transparent 100%); }
+            .archive-list li a:hover::after { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* --- BUTTONS --- */
+        .btn-primary {
+            display: block; width: 100%; background: var(--plasma); color: var(--void); text-align: center;
+            padding: 20px 32px; font-size: 12px; font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase;
+            text-decoration: none; border: none; border-radius: 12px; cursor: pointer; transition: all 0.4s var(--ease-premium); position: relative; z-index: 1;
+            box-shadow: 0 8px 24px -8px rgba(204, 255, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+            min-height: 48px;
+        }
+        .btn-primary:focus-visible, .btn-primary:active { 
+            background: #e5ff66; 
+            transform: translateY(-1px); 
+            box-shadow: 0 6px 16px -4px rgba(204, 255, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.6); 
+            outline: none; 
+        }
+        @media (hover: hover) {
+            .btn-primary:hover { 
+                background: #e5ff66; 
+                transform: translateY(-3px); 
+                box-shadow: 0 16px 32px -8px rgba(204, 255, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.7); 
+            }
+        }
+        
+        /* Section badge for drawer headers */
         .section-header { display: flex; align-items: center; margin-bottom: 40px; width: 100%; }
-        .section-header::after { content: ''; flex-grow: 1; height: 1px; background: linear-gradient(90deg, rgba(232,228,223,0.12) 0%, transparent 100%); margin-left: 24px; }
+        .section-header::after { content: ''; flex-grow: 1; height: 1px; background: linear-gradient(90deg, rgba(2,2,2,0.12) 0%, transparent 100%); margin-left: 24px; }
+        .drawer .section-header::after, .pricing-card-mini .section-header::after, .archive-category .section-header::after, footer .section-header::after { background: linear-gradient(90deg, rgba(232, 228, 223, 0.12) 0%, transparent 100%); }
         .section-badge {
-            position: relative; display: inline-flex; align-items: center; gap: 12px;
-            padding: 10px 24px 10px 18px; font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
-            text-transform: uppercase; color: var(--bone); z-index: 1; border-radius: 4px;
+            position: relative; display: inline-flex; align-items: center; gap: 12px; padding: 10px 24px 10px 18px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--bone); z-index: 1;
+            border-radius: 4px;
         }
         .section-badge::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background: var(--void); transform: skewX(-12deg); z-index: -1; border-radius: 3px;
-            box-shadow: 0 8px 20px -4px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 20px -4px rgba(0,0,0,0.2); border: 1px solid rgba(255, 255, 255, 0.08);
         }
+        @keyframes plasma-pulse { 0%, 100% { box-shadow: 0 0 12px rgba(204, 255, 0, 0.4); opacity: 1; } 50% { box-shadow: 0 0 24px rgba(204, 255, 0, 0.8); opacity: 0.6; } }
         .section-badge::after {
             content: ''; width: 6px; height: 6px; background: var(--plasma); border-radius: 50%;
-            box-shadow: 0 0 12px rgba(204,255,0,0.5); order: -1; animation: plasma-pulse 3s infinite ease-in-out;
+            box-shadow: 0 0 12px rgba(204, 255, 0, 0.5); order: -1; animation: plasma-pulse 3s infinite ease-in-out;
         }
-        @keyframes plasma-pulse { 0%,100%{box-shadow:0 0 12px rgba(204,255,0,0.4);opacity:1;}50%{box-shadow:0 0 24px rgba(204,255,0,0.8);opacity:0.6;} }
-        .lead-text { font-size: clamp(28px, 5vw, 44px); font-weight: 700; line-height: 1.15; margin-bottom: 32px; letter-spacing: -0.02em; color: var(--bone); }
-        .pricing-drawer-grid { display: grid; gap: 24px; }
-        .pricing-card-mini {
-            background: rgba(2,2,2,0.4); color: var(--bone); padding: 32px; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.08); position: relative;
-            transition: all 0.4s var(--ease-premium);
-            box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 40px -10px rgba(0,0,0,0.8);
+
+        /* Test buttons */
+        .test-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 2000;
+            display: flex;
+            gap: 12px;
         }
-        .pricing-card-mini h3 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
-        .pricing-card-mini .price-tag { font-size: 40px; font-weight: 800; line-height: 1; margin-bottom: 24px; color: var(--plasma); text-shadow: 0 0 16px rgba(204,255,0,0.2); }
-        .pricing-card-mini .price-tag span { font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 500; color: rgba(255,255,255,0.4); vertical-align: middle; margin-left: 4px; }
-        .feature-list { list-style: none; margin-bottom: 32px; }
-        .feature-list li { font-size: 15px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 12px; color: rgba(232,228,223,0.85); line-height: 1.5; }
-        .feature-list li::before { content: '✓'; color: var(--plasma); font-weight: 800; font-size: 14px; }
-        .btn-primary {
-            display: block; width: 100%; background: var(--plasma); color: var(--void); text-align: center;
-            padding: 20px 32px; font-size: 12px; font-family: 'Outfit', sans-serif; font-weight: 800;
-            letter-spacing: 0.15em; text-transform: uppercase; text-decoration: none; border: none;
-            border-radius: 12px; cursor: pointer; transition: all 0.4s var(--ease-premium);
-            box-shadow: 0 8px 24px -8px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+        .test-btn {
+            background: var(--void);
+            color: var(--bone);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
         }
-        .btn-primary:hover { background: #e5ff66; transform: translateY(-3px); }
-        .archive-drawer-grid { display: grid; gap: 24px; }
-        .archive-category {
-            background: rgba(2,2,2,0.4); padding: 32px; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-        .archive-list { list-style: none; }
-        .archive-list li a {
-            display: flex; justify-content: space-between; align-items: center;
-            color: rgba(232,228,223,0.75); text-decoration: none; font-size: 15px;
-            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
-            transition: all 0.3s;
-        }
-        .archive-list li a::after { content: '↗'; font-size: 13px; color: var(--plasma); opacity: 0; transform: translateX(-16px); transition: all 0.4s; }
-        .archive-list li a:hover::after { opacity: 1; transform: translateX(0); }
-        .archive-list li a:hover { color: var(--plasma); padding-left: 12px; }
     </style>
 </head>
 <body>
-    <div class="page-content">
-        <button class="open-drawer-btn" id="openPricingDrawer">Open Pricing Drawer (with links/cards)</button>
-        <button class="open-drawer-btn" id="openArchiveDrawer" style="margin-left: 20px;">Open Archive Drawer (with links)</button>
-        <p style="margin-top: 40px;">Test on iOS: touch a link/card and drag vertically. Does it scroll?<br>Touch the background (padding area) and drag. Does it scroll?<br>The difference tells you where the bug lives.</p>
+    <!-- Test buttons to open drawers -->
+    <div class="test-controls">
+        <button id="open-pricing" class="test-btn">Open Pricing Drawer</button>
+        <button id="open-archive" class="test-btn">Open Archive Drawer</button>
     </div>
 
-    <div id="drawer-overlay" class="drawer-overlay"></div>
+    <!-- DRAWER OVERLAY -->
+    <div id="drawer-overlay" class="drawer-overlay" aria-hidden="true"></div>
 
-    <!-- PRICING DRAWER (exact copy from original) -->
-    <aside id="pricing-drawer" class="drawer">
-        <button class="drawer-close" aria-label="Close">&times;</button>
+    <!-- Pricing Drawer (exact copy from original) -->
+    <aside id="pricing-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="pricing-title">
+        <button class="drawer-close" aria-label="Close Pricing">&times;</button>
         <div class="drawer-scroll">
-            <div class="section-header"><div class="section-badge">The Offer</div></div>
-            <h2 class="lead-text">One partner.<br>Unlimited builds.</h2>
-            <div class="pricing-drawer-grid">
-                <div class="pricing-card-mini">
-                    <div class="section-header"><div class="section-badge">Standard</div></div>
-                    <h3>One-Page Lander™</h3>
-                    <div class="price-tag">$750</div>
-                    <ul class="feature-list"><li>Custom one-page site</li><li>1 light revision</li></ul>
-                    <a href="https://buy.stripe.com/7sY28r88b9kudoobeU0oM0c" target="_blank" class="btn-primary">Start Project</a>
-                </div>
-                <div class="pricing-card-mini">
-                    <div class="section-header"><div class="section-badge">Expanded</div></div>
-                    <h3>Three-Page Custom™</h3>
-                    <div class="price-tag">$1,500<span>.00</span></div>
-                    <ul class="feature-list"><li>Custom three-page site</li><li>2 light revisions</li></ul>
-                    <a href="https://buy.stripe.com/8x2cN5fADeEOfww0Ag0oM0d" target="_blank" class="btn-primary">Start Project</a>
-                </div>
+        <div class="section-header" style="margin-bottom: 32px;"><div class="section-badge">The Offer</div></div>
+        <h2 id="pricing-title" class="lead-text" style="color: var(--bone); font-size: clamp(28px, 6vw, 36px); margin-bottom: 48px;">One partner.<br>Unlimited builds.</h2>
+        <div class="pricing-drawer-grid">
+            <div class="pricing-card-mini tier-special">
+                <div class="section-header" style="margin-bottom: 16px;"><div class="section-badge" style="background: var(--magenta);">First 3 Clients</div></div>
+                <h3>Three-Page Cut™</h3>
+                <div class="price-tag">$1,050</div>
+                <ul class="feature-list">
+                    <li>Custom three-page site</li>
+                    <li>2 light revisions</li>
+                    <li>Applied sales psychology</li>
+                </ul>
+                <a href="https://buy.stripe.com/eVq6oH3RVdAKckk82I0oM0f" target="_blank" rel="noopener noreferrer" class="btn-primary" style="background: var(--magenta); color: var(--bone);">Secure Offer</a>
             </div>
+            <div class="pricing-card-mini">
+                <div class="section-header" style="margin-bottom: 16px;"><div class="section-badge">Standard</div></div>
+                <h3>One-Page Lander™</h3>
+                <div class="price-tag">$1,900</div>
+                <ul class="feature-list">
+                    <li>Custom one-page site</li>
+                    <li>2 Revisions w/in 30 days.</li>
+                    <li>Applied sales psychology</li>
+                </ul>
+                <a href="https://buy.stripe.com/7sY28r88b9kudoobeU0oM0c" target="_blank" rel="noopener noreferrer" class="btn-primary">Start Project</a>
+            </div>
+            <div class="pricing-card-mini">
+                <div class="section-header" style="margin-bottom: 16px;"><div class="section-badge">Expanded</div></div>
+                <h3>Five-Page TakeOff™</h3>
+                <div class="price-tag">$2,900<span>.00</span></div>
+                <ul class="feature-list">
+                    <li>Up to a 5 page, custom-coded website</li>
+                    <li>3 light revisions w/in 30 days.</li>
+                    <li>Applied sales psychology</li>
+                </ul>
+                <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary">Start Project</a>
+            </div>
+            <div class="pricing-card-mini tier-sub">
+                <div class="section-header" style="margin-bottom: 16px;"><div class="section-badge">Subscription</div></div>
+                <h3>30-Day BNDR Unlimited™</h3>
+                <div class="price-tag">$3,900<span>/mo</span></div>
+                <ul class="feature-list">
+                    <li>Unlimited requests (1 active)</li>
+                    <li>Unlimited revisions</li>
+                    <li>Pause or cancel anytime</li>
+                </ul>
+                <a href="https://buy.stripe.com/eVq28r0FJ2W6988aaQ0oM0e" target="_blank" rel="noopener noreferrer" class="btn-primary">Start Project</a>
+            </div>
+        </div>
         </div>
     </aside>
 
-    <!-- ARCHIVE DRAWER (exact copy from original, shortened for brevity but includes links) -->
-    <aside id="archive-drawer" class="drawer">
-        <button class="drawer-close" aria-label="Close">&times;</button>
+    <!-- Archive Drawer (exact copy from original) -->
+    <aside id="archive-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="archive-title">
+        <button class="drawer-close" aria-label="Close Archive">&times;</button>
         <div class="drawer-scroll">
-            <div class="section-header"><div class="section-badge">The Archive</div></div>
-            <div class="archive-drawer-grid">
-                <div class="archive-category">
-                    <div class="section-header"><div class="section-badge">Core</div></div>
-                    <ul class="archive-list">
-                        <li><a href="https://bndrbots.github.io/BNDR_LifeMatrix/">LifeMatrix</a></li>
-                        <li><a href="https://bndrbots.github.io/Studio/">Studio</a></li>
-                        <li><a href="https://bndrbots.github.io/Voss/">Voss</a></li>
-                    </ul>
-                </div>
+        <div class="section-header" style="margin-bottom: 48px;"><div id="archive-title" class="section-badge">The Archive</div></div>
+        <div class="archive-drawer-grid">
+            <div class="archive-category">
+                <div class="section-header"><div class="section-badge">Concepts + Ideas</div></div>
+                <ul class="archive-list">
+                    <li><a href="https://bndrbots.github.io/immersion/">Immersion</a></li>
+                    <li><a href="https://bndrbots.github.io/reflex/">Reflex Entertainment™</a></li>
+                    <li><a href="https://bndrbots.github.io/demo/">Thumper</a></li>
+                    <li><a href="https://bndrbots.github.io/TheFeedUpraded">The Feed</a></li>
+                    <li><a href="https://bndrbots.github.io/oilflux/">Oil Spill</a></li>
+                    <li><a href="https://bndrbots.github.io/VenomCuts/">Venom Cuts</a></li>
+                    <li><a href="https://bndrbots.github.io/heavyink/">Heavy Ink</a></li>
+                    <li><a href="https://bndrbots.github.io/LinkTreePlus/#home">LynkTrē+</a></li>
+                </ul>
             </div>
+            <div class="archive-category">
+                <div class="section-header"><div class="section-badge">Broad Styles</div></div>
+                <ul class="archive-list">
+                    <li><a href="https://bndrbots.github.io/Voss/">Voss</a></li>
+                    <li><a href="https://bndrbots.github.io/sport_formal/">Sport | Formal</a></li>
+                    <li><a href="https://bndrbots.github.io/EpochAura/">Epoch & Aura</a></li>
+                    <li><a href="https://bndrbots.github.io/PrivateWealth/">Private Wealth</a></li>
+                    <li><a href="https://bndrbots.github.io/lifespace/">Life Space</a></li>
+                    <li><a href="https://bndrbots.github.io/jacksons/">Jackson's</a></li>
+                    <li><a href="https://bndrbots.github.io/Sangredelsol/">Sangre del Sol</a></li>
+                    <li><a href="https://bndrbots.github.io/Evies_Cafe/">Evie's Cafe</a></li>
+                </ul>
+            </div>
+            <div class="archive-category">
+                <div class="section-header"><div class="section-badge">Games + Time Killers</div></div>
+                <ul class="archive-list">
+                    <li><a href="https://bndrbots.github.io/RogueRitaV3/">Rogue Rita V3</a></li>
+                    <li><a href="https://bndrbots.github.io/RogueRitaV2/">Rogue Rita V2</a></li>
+                    <li><a href="https://bndrbots.github.io/RogueRitaV1/">Rogue Rita V1</a></li>
+                    <li><a href="https://bndrbots.github.io/endlessfocus/">Endless Dodge</a></li>
+                    <li><a href="https://bndrbots.github.io/pixelmelt/">Pixel Melt</a></li>
+                    <li><a href="https://bndrbots.github.io/secondchancephysics/">Tactile + Fun</a></li>
+                    <li><a href="https://bndrbots.github.io/liquidglass/">Liquid Glass</a></li>
+                    <li><a href="https://bndrbots.github.io/gravitywells/">Gravity Wells</a></li>
+                </ul>
+            </div>
+            <div class="archive-category">
+                <div class="section-header"><div class="section-badge">Other Work</div></div>
+                <ul class="archive-list">
+                    <li><a href="https://bndrbots.github.io/resourcecite/#home">ResourceCite™</a></li>
+                    <li><a href="https://bndrbots.github.io/BNDR_LifeMatrix/">BNDR LifeMatrix™</a></li>
+                    <li><a href="#">Qalm™</a></li>
+                    <li><a href="https://bndrbots.github.io/rosefieldvip/">Rose Field</a></li>
+                    <li><a href="https://bndrbots.github.io/crystal_love/">Crystal Love</a></li>
+                    <li><a href="https://bndrbots.github.io/BNDRVoice/">BNDR Voice™</a></li>
+                    <li><a href="https://bndrbots.github.io/morph_black/">Morph Black</a></li>
+                    <li><a href="https://bndrbots.github.io/cyber_playground/">Twirling 3D Playground</a></li>
+                </ul>
+            </div>
+        </div>
         </div>
     </aside>
 
     <script>
-        // Exact SurfaceController logic from original (no Three.js, no extra listeners)
-        const SurfaceController = {
-            activeSurface: null,
-            lastFocus: null,
-            init() {
-                document.querySelectorAll('.drawer-close, .drawer-overlay').forEach(el => {
-                    el.addEventListener('click', (e) => {
-                        if (e.target === el || e.currentTarget.classList.contains('drawer-close')) {
-                            this.close();
-                        }
+        (function() {
+            const SurfaceController = {
+                activeSurface: null,
+                lastFocus: null,            
+                init() {
+                    document.querySelectorAll('.drawer-close, .drawer-overlay').forEach(el => {
+                        el.addEventListener('click', (e) => {
+                            if (e.target === el || e.currentTarget.classList.contains('drawer-close')) {
+                                this.close();
+                            }
+                        });
                     });
-                });
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && this.activeSurface) this.close();
-                });
-            },
-            open(surfaceId, triggerBtn) {
-                if (this.activeSurface) this.close();
-                this.activeSurface = document.getElementById(surfaceId);
-                if (!this.activeSurface) return;
-                this.lastFocus = triggerBtn || document.activeElement;
-                this.activeSurface.classList.add('active');
-                const overlay = document.getElementById('drawer-overlay');
-                if (overlay) overlay.classList.add('active');
-                const scrollY = window.scrollY;
-                document.documentElement.style.overflow = 'hidden';
-                document.body.style.overflow = 'hidden';
-                document.body.style.position = 'fixed';
-                document.body.style.top = `-${scrollY}px`;
-                document.body.style.width = '100%';
-                document.body.dataset.scrollY = scrollY;
-                const firstFocusable = this.activeSurface.querySelector('button, a');
-                if (firstFocusable) setTimeout(() => firstFocusable.focus(), 50);
-            },
-            close() {
-                if (!this.activeSurface) return;
-                const scrollY = document.body.dataset.scrollY;
-                document.documentElement.style.overflow = '';
-                document.body.style.overflow = '';
-                document.body.style.position = '';
-                document.body.style.top = '';
-                document.body.style.width = '';
-                if (scrollY) window.scrollTo(0, parseInt(scrollY || '0'));
-                this.activeSurface.classList.remove('active');
-                const overlay = document.getElementById('drawer-overlay');
-                if (overlay) overlay.classList.remove('active');
-                if (this.lastFocus && this.lastFocus.focus) this.lastFocus.focus();
-                this.activeSurface = null;
-            }
-        };
-        SurfaceController.init();
-        document.getElementById('openPricingDrawer').addEventListener('click', () => SurfaceController.open('pricing-drawer', document.getElementById('openPricingDrawer')));
-        document.getElementById('openArchiveDrawer').addEventListener('click', () => SurfaceController.open('archive-drawer', document.getElementById('openArchiveDrawer')));
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && this.activeSurface) this.close();
+                    });
+                },
+                open(surfaceId, triggerBtn) {
+                    if (this.activeSurface) this.close();                
+                    this.activeSurface = document.getElementById(surfaceId);
+                    if (!this.activeSurface) return;
+                    this.lastFocus = triggerBtn || document.activeElement;
+                    if (triggerBtn && triggerBtn.setAttribute) triggerBtn.setAttribute('aria-expanded', 'true');
+                    this.activeSurface.classList.add('active');
+                    if (this.activeSurface.classList.contains('drawer')) {
+                        document.getElementById('drawer-overlay').classList.add('active');
+                    }
+                    const scrollY = window.scrollY;
+                    document.documentElement.style.overflow = 'hidden';
+                    document.documentElement.style.overscrollBehavior = 'none';
+                    document.body.style.overflow = 'hidden';
+                    document.body.style.position = 'fixed';
+                    document.body.style.top = `-${scrollY}px`;
+                    document.body.style.width = '100%';
+                    document.body.dataset.scrollY = scrollY;
+                },
+                close() {
+                    if (!this.activeSurface) return;
+                    this.activeSurface.classList.remove('active');
+                    if (this.activeSurface.classList.contains('drawer')) {
+                        document.getElementById('drawer-overlay').classList.remove('active');
+                    }
+                    const scrollY = document.body.dataset.scrollY;
+                    document.documentElement.style.overflow = '';
+                    document.documentElement.style.overscrollBehavior = '';
+                    document.body.style.overflow = '';
+                    document.body.style.position = '';
+                    document.body.style.top = '';
+                    document.body.style.width = '';
+                    window.scrollTo(0, parseInt(scrollY || '0'));
+                    if (this.lastFocus && this.lastFocus.setAttribute) {
+                        this.lastFocus.setAttribute('aria-expanded', 'false');
+                        this.lastFocus.focus();
+                    }
+                    this.activeSurface = null;
+                }
+            };
+            SurfaceController.init();
+
+            document.getElementById('open-pricing').addEventListener('click', function() {
+                SurfaceController.open('pricing-drawer', this);
+            });
+            document.getElementById('open-archive').addEventListener('click', function() {
+                SurfaceController.open('archive-drawer', this);
+            });
+        })();
     </script>
 </body>
 </html>
