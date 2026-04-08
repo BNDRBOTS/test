@@ -12,15 +12,11 @@
         /* --- RESET & TOKENS --- */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
         
-        /* Enforce instant touch response universally and prevent accidental highlighting */
-        a, button, summary, .drawer-close, .modal-close { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
-        input, textarea { touch-action: manipulation; }
-
-        /* Ensure typography remains completely selectable */
-        h1, h2, h3, p, span, div, address, li { user-select: text; -webkit-user-select: text; }
+        /* Enforce instant touch response universally */
+        a, button, input, textarea, summary { touch-action: manipulation; }
 
         /* Force fluid panning on scroll containers */
-        .drawer-scroll, .drawer-scroll * { touch-action: pan-y !important; }
+        .drawer-scroll { touch-action: pan-y; }
 
         /* Guarantee Jobs-level touch targets on all touch devices without breaking desktop layout */
         @media (pointer: coarse) {
@@ -345,7 +341,20 @@
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
+            touch-action: pan-y;
+            user-select: none; /* prevents selection during drag, allows scroll capture */
             padding: 96px max(32px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(32px, env(safe-area-inset-left));
+        }
+
+        /* Re-enable selection only for actual text on long-press */
+        .drawer-scroll p,
+        .drawer-scroll li,
+        .drawer-scroll h2,
+        .drawer-scroll h3,
+        .drawer-scroll .lead-text,
+        .drawer-scroll .body-text {
+            user-select: text;
+            -webkit-touch-callout: default;
         }
 
         /* Kill tap highlight on cards so they don't compete */
@@ -980,8 +989,6 @@
                 document.body.style.top = `-${scrollY}px`;
                 document.body.style.width = '100%';
                 document.body.dataset.scrollY = scrollY;
-                document.getElementById('ui-layer').setAttribute('inert', '');
-                document.getElementById('main-nav').setAttribute('inert', '');
                 flashSystem();
                 const firstFocusable = this.activeSurface.querySelector('button, input, textarea, a');
                 if (firstFocusable) {
@@ -1002,8 +1009,6 @@
                 document.body.style.top = '';
                 document.body.style.width = '';
                 window.scrollTo(0, parseInt(scrollY || '0'));
-                document.getElementById('ui-layer').removeAttribute('inert');
-                document.getElementById('main-nav').removeAttribute('inert');
                 if (this.lastFocus && this.lastFocus.setAttribute) {
                     this.lastFocus.setAttribute('aria-expanded', 'false');
                     this.lastFocus.focus();
