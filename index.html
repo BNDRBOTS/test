@@ -12,22 +12,7 @@
         /* --- RESET & TOKENS --- */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
         
-        /* Enforce instant touch response universally */
-        a, button, input, textarea, summary { touch-action: manipulation; }
-
-        /* Force fluid panning on scroll containers */
-        .drawer-scroll { touch-action: pan-y; }
-
-        /* Guarantee Jobs-level touch targets on all touch devices without breaking desktop layout */
-        @media (pointer: coarse) {
-            .connect-btn, .footer-policy-links a, .footer-links a:not(.connect-btn), 
-            .nav-pill a, .nav-pill button, .drawer-close, .modal-close,
-            button.section-badge {
-                min-height: 44px !important;
-                display: inline-flex;
-                align-items: center;
-            }
-        }
+        .drawer-scroll, .drawer-scroll * { touch-action: pan-y !important; }
 
         :root {
             --bone: #E8E4DF;       
@@ -273,7 +258,7 @@
         
         /* --- BUTTONS --- */
         .btn-primary {
-            display: flex; justify-content: center; align-items: center; width: 100%; background: var(--plasma); color: var(--void); text-align: center;
+            display: block; width: 100%; background: var(--plasma); color: var(--void); text-align: center;
             padding: 20px 32px; font-size: 12px; font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase;
             text-decoration: none; border: none; border-radius: 12px; cursor: pointer; transition: all 0.4s var(--ease-premium); position: relative; z-index: 1;
             box-shadow: 0 8px 24px -8px rgba(204, 255, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.5);
@@ -587,7 +572,7 @@
     </script>
     <nav class="nav-pill" id="main-nav" aria-label="Main Navigation">
         <a href="#ui-layer">Home</a>
-        <button id="nav-archive-btn" aria-controls="archive-drawer">Index</button>
+        <button id="nav-archive-btn" aria-controls="archive-drawer">Archive</button>
         <button id="nav-pricing-btn" aria-controls="pricing-drawer">Pricing</button>
         <a href="#faq">FAQ</a>
         <button id="nav-contact-btn" aria-haspopup="dialog" aria-controls="contact-modal">Contact</button>
@@ -605,10 +590,11 @@
                     <div class="section-header">
                         <div class="section-badge">The Big Difference</div>
                     </div>
-                    <p class="lead-text" id="work-lead">Custom built directly around your business, your offer, and the first few seconds that decide whether someone stays or leaves.</p>
+                    <p class="lead-text" id="work-lead">Most sites start from the same handful of premade layouts 
+                        Which is why so many of them feel interchangeable.</p>
                 </div>
                 <div class="reveal-right delay-2 io-target balance-offset">
-                    <p class="body-text">Every detail is constructed from the ground up to ensure your platform operates exactly how your audience expects.</p>
+                    <p class="body-text">I write the code around your business, your offer, and the first few seconds that decide whether someone stays or leaves.</p>
                 </div>
             </div>
         </section>
@@ -617,7 +603,7 @@
                 <div class="section-header reveal-up io-target" style="margin-bottom: 32px;">
                     <div class="section-badge">F.A.Q.</div>
                 </div>
-                <p class="lead-text reveal-up delay-1 io-target" style="margin-bottom: 64px;">The Process.</p>
+                <p class="lead-text reveal-up delay-1 io-target" style="margin-bottom: 64px;">"We Make it Easy".</p>
                 
                 <div class="faq-columns">
                     <div class="faq-col reveal-left delay-2 io-target">
@@ -629,15 +615,15 @@
                         </details>
                         <details class="faq-item">
                             <summary>What can be requested?</summary>
-                            <p>30-Day BNDR Unlimited™ includes unlimited requests including: Websites, Refinements on Existing Content, Intelligent workflows, Integrations, Branding, Data Analysis, Bottleneck Breakouts, Marketing Materials, Services, Graphic design, Dashboards, Web applications, and more.</p>
+                            <p>30-Day Unlimited includes unlimited requests including: Websites, Refinements on Existing Content, AI agents, Integrations, Branding, Data Analysis, Bottleneck Breakouts, Marketing Materials, Services, Graphic design, Dashboards, Web applications, and more.</p>
                         </details>
                         <details class="faq-item">
                             <summary>How fast is delivery?</summary>
-                            <p>When a request goes active, it gets a stated delivery window. Larger requests ship in checkpoints until finished.</p>
+                            <p>When a request goes active, it gets a stated delivery window. Larger requests ship in checkpoints until complete.</p>
                         </details>
                         <details class="faq-item">
                             <summary>How do requests work?</summary>
-                            <p>For 30-Day BNDR Unlimited™, unlimited requests can be queued. Requests run sequentially. One priority is handled at a time, ensuring dedicated focus. Smaller refinements may occasionally be bundled for efficiency.</p>
+                            <p>For 30-Day BNDR Unlimited™, unlimited requests can be queued. One request is active at a time, if it's something smaller, at times I may have the room to double-up, but not always.</p>
                         </details>
                         <details class="faq-item">
                             <summary>How do revisions work?</summary>
@@ -662,12 +648,12 @@
                             <p>Call, Email, Text, whatever is easiest for you. A shared board can be added. Something like private ChatGPT space can be included.</p>
                         </details>
                         <details class="faq-item">
-                            <summary>Do you use intelligent workflows?</summary>
-                            <p>Intelligent tools are integrated into the workflow, guided by a heavy human hand & eye.</p>
+                            <summary>Do you use AI?</summary>
+                            <p>Yes. AI is part of my workflow across web services, with a heavy human hand & eye in the loop.</p>
                         </details>
                         <details class="faq-item">
                             <summary>Do you build in Webflow?</summary>
-                            <p>You receive fully custom, production-grade code. Ready to launch, or launched and hosted for you.</p>
+                            <p>No. You're getting the real deal in coded form. Ready to launch, or launched (Hosted) for you.</p>
                         </details>
                         <details class="faq-item">
                             <summary>How many people from my team can be involved?</summary>
@@ -683,11 +669,11 @@
                         </details>
                         <details class="faq-item">
                             <summary>What happens outside the selected package?</summary>
-                            <p>Additional requests beyond the selected tier are billed at $75/hr.</p>
+                            <p>Additional work beyond the selected package is billed at $75/hr.</p>
                         </details>
                         <details class="faq-item">
                             <summary>What's the refund policy?</summary>
-                            <p>30-Day BNDR Unlimited™ is a month-to-month engagement. Flexibility to pause or cancel. It includes a 1-week 75% money-back guarantee. After the first week, the month remains active through day 30 and is non-refundable. Due to the custom nature of the work, standard projects are non-refundable. While this is true, it's important to remember that client satisfaction is a primary driving force behind my work.</p>
+                            <p>30-Day BNDR Unlimited™ is month-to-month. Cancel anytime. It includes a 1-week 75% money-back guarantee. After the first week, the month remains active through day 30 and is non-refundable. All other work is non-refundable. While this is true, it's important to remember that client satisfaction is a primary driving force behind my work.</p>
                         </details>
                     </div>
                 </div>
@@ -804,7 +790,7 @@
     <aside id="archive-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="archive-title">
         <button class="drawer-close" aria-label="Close Archive">&times;</button>
         <div class="drawer-scroll">
-        <div class="section-header" style="margin-bottom: 48px;"><div id="archive-title" class="section-badge">The Index</div></div>
+        <div class="section-header" style="margin-bottom: 48px;"><div id="archive-title" class="section-badge">The Archive</div></div>
         <div class="archive-drawer-grid">
             <div class="archive-category">
                 <div class="section-header"><div class="section-badge">Concepts + Ideas</div></div>
@@ -839,7 +825,7 @@
                     <li><a href="https://bndrbots.github.io/RogueRitaV2/">Rogue Rita V2</a></li>
                     <li><a href="https://bndrbots.github.io/RogueRitaV1/">Rogue Rita V1</a></li>
                     <li><a href="https://bndrbots.github.io/endlessfocus/">Endless Dodge</a></li>
-                    <li><a href="https://bndrbots.github.io/pixelmelt/">Digital Melt</a></li>
+                    <li><a href="https://bndrbots.github.io/pixelmelt/">Pixel Melt</a></li>
                     <li><a href="https://bndrbots.github.io/secondchancephysics/">Tactile + Fun</a></li>
                     <li><a href="https://bndrbots.github.io/liquidglass/">Liquid Glass</a></li>
                     <li><a href="https://bndrbots.github.io/gravitywells/">Gravity Wells</a></li>
@@ -865,7 +851,7 @@
     <div id="contact-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="contact-title">
         <div class="modal-content">
             <button class="modal-close" aria-label="Close Contact Modal">&times;</button>
-            <h2 id="contact-title">Start Project</h2>
+            <h2 id="contact-title">Initialize Project</h2>
             <form id="contact-form">
                 <div class="form-group">
                     <input type="text" placeholder="Your Name" required aria-label="Your Name">
@@ -876,7 +862,7 @@
                 <div class="form-group">
                     <textarea placeholder="Briefly describe your objective..." rows="4" required aria-label="Briefly describe your objective"></textarea>
                 </div>
-                <button type="submit" class="btn-primary">Send Request</button>
+                <button type="submit" class="btn-primary">Send Transmission</button>
             </form>
         </div>
     </div>
@@ -988,6 +974,8 @@
                 document.body.style.top = `-${scrollY}px`;
                 document.body.style.width = '100%';
                 document.body.dataset.scrollY = scrollY;
+                document.getElementById('ui-layer').setAttribute('inert', '');
+                document.getElementById('main-nav').setAttribute('inert', '');
                 flashSystem();
                 const firstFocusable = this.activeSurface.querySelector('button, input, textarea, a');
                 if (firstFocusable) {
@@ -1008,6 +996,8 @@
                 document.body.style.top = '';
                 document.body.style.width = '';
                 window.scrollTo(0, parseInt(scrollY || '0'));
+                document.getElementById('ui-layer').removeAttribute('inert');
+                document.getElementById('main-nav').removeAttribute('inert');
                 if (this.lastFocus && this.lastFocus.setAttribute) {
                     this.lastFocus.setAttribute('aria-expanded', 'false');
                     this.lastFocus.focus();
@@ -1037,7 +1027,7 @@
                 e.preventDefault();
                 const btn = e.target.querySelector('button[type="submit"]');
                 const originalText = btn.textContent;
-                btn.textContent = 'Request Sent';
+                btn.textContent = 'Transmission Sent';
                 btn.style.backgroundColor = 'var(--bone)';
                 btn.style.color = 'var(--charcoal)';        
                 setTimeout(() => {
