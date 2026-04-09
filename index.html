@@ -13,7 +13,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
         
         /* Enforce instant touch response universally and rigidly disable native drag hijacking globally */
-        a, button, summary, img, .pricing-card-mini, .archive-category { 
+        a, button, summary, img { 
             touch-action: manipulation; 
             -webkit-user-drag: none; 
             -webkit-touch-callout: none;
@@ -338,10 +338,10 @@
 
         .drawer-scroll {
             flex: 1 1 auto;
+            height: 100%;
             min-height: 0;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            touch-action: pan-y;
             user-select: none;
             padding: 96px max(32px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(32px, env(safe-area-inset-left));
         }
@@ -356,14 +356,8 @@
             -webkit-touch-callout: default;
         }
 
-        .drawer-scroll a,
-        .drawer-scroll button {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-drag: none;
-            touch-action: pan-y;
-        }
-
         .drawer.active { transform: translateX(0); }
+        .drawer-header-margin { margin-bottom: 48px; }
 
         .drawer-close {
             position: absolute; top: max(32px, env(safe-area-inset-top, 32px)); right: max(32px, env(safe-area-inset-right, 32px));
@@ -387,15 +381,30 @@
             transition: border-color 0.4s var(--ease-premium), background-color 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium);
             box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 40px -10px rgba(0,0,0,0.5);
             height: 100%; display: flex; flex-direction: column;
-            touch-action: pan-y;
         }
         @media (hover: hover) { .pricing-card-mini:hover { border-color: rgba(255,255,255,0.3); background: rgba(10, 10, 11, 0.85); } }
         .pricing-card-mini.tier-special { border-color: rgba(255, 0, 85, 0.6); box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 16px 40px rgba(255, 0, 85, 0.15); }
         .pricing-card-mini.tier-sub { border-color: rgba(204, 255, 0, 0.4); }
         .pricing-card-mini h3 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
-        .pricing-card-mini .price-tag { font-size: 40px; font-weight: 800; line-height: 1; margin-bottom: 24px; color: var(--plasma); text-shadow: 0 0 16px rgba(204, 255, 0, 0.2); }
+        .pricing-card-mini .price-tag { 
+            display: flex;
+            align-items: baseline;
+            font-size: 40px; 
+            font-weight: 800; 
+            line-height: 1; 
+            margin-bottom: 24px; 
+            color: var(--plasma); 
+            text-shadow: 0 0 16px rgba(204, 255, 0, 0.2); 
+        }
         .pricing-card-mini.tier-special .price-tag { color: var(--magenta); text-shadow: 0 0 16px rgba(255, 0, 85, 0.25); }
-        .pricing-card-mini .price-tag span { font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 500; color: rgba(255,255,255,0.4); text-shadow: none; vertical-align: super; margin-left: 4px; }   
+        .pricing-card-mini .price-tag span { 
+            font-size: 16px; 
+            font-family: 'Inter', sans-serif; 
+            font-weight: 500; 
+            color: rgba(255,255,255,0.4); 
+            text-shadow: none; 
+            margin-left: 4px; 
+        }   
         .pricing-card-mini .feature-list { list-style: none; margin-bottom: 32px; flex-grow: 1; }
         .pricing-card-mini .feature-list li { font-size: 15px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 12px; color: rgba(232, 228, 223, 0.85); line-height: 1.5; }
         .pricing-card-mini .feature-list li::before { content: '✓'; color: var(--plasma); font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 14px; }
@@ -410,7 +419,6 @@
             transition: border-color 0.4s var(--ease-premium), background-color 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium);
             box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 40px -10px rgba(0,0,0,0.5);
             height: 100%; display: flex; flex-direction: column;
-            touch-action: pan-y;
         }
         @media (hover: hover) { .archive-category:hover { border-color: rgba(255,255,255,0.3); background: rgba(10, 10, 11, 0.85); } }
         .archive-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
@@ -419,6 +427,8 @@
             text-decoration: none; font-size: 15px; font-weight: 500; padding: 14px 0;
             border-bottom: 1px solid rgba(255,255,255,0.06); transition: all 0.3s var(--ease-premium); position: relative;
             min-height: 48px;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .archive-list li a::after { content: '↗'; font-size: 13px; color: var(--plasma); opacity: 0; transform: translateX(-16px); transition: all 0.4s var(--ease-premium); }
         
@@ -532,8 +542,9 @@
                 -webkit-backdrop-filter: blur(24px) saturate(180%);
             }
             .drawer-scroll {
-                padding: max(80px, env(safe-area-inset-top, 64px)) 24px max(64px, env(safe-area-inset-bottom)) 24px;
+                padding: max(48px, env(safe-area-inset-top, 48px)) 24px max(64px, env(safe-area-inset-bottom)) 24px;
             }
+            .drawer-header-margin { margin-bottom: 24px; }
             .drawer-close {
                 top: max(16px, env(safe-area-inset-top, 16px));
                 right: 16px;
@@ -752,8 +763,8 @@
     <aside id="pricing-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="pricing-title">
         <button class="drawer-close" aria-label="Close Pricing">&times;</button>
         <div class="drawer-scroll">
-        <div class="section-header" style="margin-bottom: 32px;"><div class="section-badge">The Offer</div></div>
-        <h2 id="pricing-title" class="lead-text" style="color: var(--bone); font-size: clamp(28px, 6vw, 36px); margin-bottom: 48px;">One partner.<br>Unlimited builds.</h2>
+        <div class="section-header drawer-header-margin"><div class="section-badge">The Offer</div></div>
+        <h2 id="pricing-title" class="lead-text drawer-header-margin" style="color: var(--bone); font-size: clamp(28px, 6vw, 36px);">One partner.<br>Unlimited builds.</h2>
         <div class="pricing-drawer-grid">
             <div class="pricing-card-mini tier-special">
                 <div class="section-header" style="margin-bottom: 16px;"><div class="section-badge" style="background: var(--magenta);">First 3 Clients</div></div>
@@ -806,7 +817,7 @@
     <aside id="archive-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="archive-title">
         <button class="drawer-close" aria-label="Close Archive">&times;</button>
         <div class="drawer-scroll">
-        <div class="section-header" style="margin-bottom: 48px;"><div id="archive-title" class="section-badge">The Index</div></div>
+        <div class="section-header drawer-header-margin"><div id="archive-title" class="section-badge">The Index</div></div>
         <div class="archive-drawer-grid">
             <div class="archive-category">
                 <div class="section-header"><div class="section-badge">Concepts + Ideas</div></div>
@@ -986,9 +997,6 @@
                 document.documentElement.style.overflow = 'hidden';
                 document.documentElement.style.overscrollBehavior = 'none';
                 document.body.style.overflow = 'hidden';
-                document.body.style.position = 'fixed';
-                document.body.style.top = `-${scrollY}px`;
-                document.body.style.width = '100%';
                 document.body.dataset.scrollY = scrollY;
                 flashSystem();
                 const firstFocusable = this.activeSurface.querySelector('button, input, textarea, a');
@@ -1006,9 +1014,6 @@
                 document.documentElement.style.overflow = '';
                 document.documentElement.style.overscrollBehavior = '';
                 document.body.style.overflow = '';
-                document.body.style.position = '';
-                document.body.style.top = '';
-                document.body.style.width = '';
                 window.scrollTo(0, parseInt(scrollY || '0'));
                 if (this.lastFocus && this.lastFocus.setAttribute) {
                     this.lastFocus.setAttribute('aria-expanded', 'false');
