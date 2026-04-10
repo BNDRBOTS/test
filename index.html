@@ -12,13 +12,14 @@
         /* --- RESET & TOKENS --- */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
         
-        /* Enforce instant touch response universally and rigidly disable native drag hijacking globally */
-        a, button, summary, img { 
-            touch-action: manipulation;
-            -webkit-user-drag: none; 
-            -webkit-touch-callout: none;
+        /* Enforce instant touch response universally */
+        a, button, input, textarea, summary { 
+            touch-action: manipulation; 
         }
-        input, textarea { touch-action: manipulation; }
+        img { 
+            -webkit-user-drag: none; 
+            -webkit-touch-callout: none; 
+        }
 
         /* Guarantee Jobs-level touch targets on all touch devices without breaking desktop layout */
         @media (pointer: coarse) {
@@ -102,14 +103,18 @@
             right: max(24px, env(safe-area-inset-right));
             transform: translate(0, -20px);
             opacity: 0;
-            background: rgba(10, 10, 11, 0.75);
+            background: linear-gradient(180deg, rgba(26, 26, 28, 0.85) 0%, rgba(10, 10, 11, 0.95) 100%);
             backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.8);
             border-radius: var(--radius-pill);
             display: flex;
             gap: 4px;
             padding: 6px;
-            z-index: 100; box-shadow: 0 16px 40px -8px rgba(2, 2, 2, 0.4), inset 0 1px 0 rgba(255,255,255,0.15); transition: transform 0.6s var(--ease-out-expo), opacity 0.6s var(--ease-out-expo);
+            z-index: 100; 
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.25), inset 0 -2px 6px rgba(0, 0, 0, 0.6); 
+            transition: transform 0.6s var(--ease-out-expo), opacity 0.6s var(--ease-out-expo);
             max-width: calc(100% - 48px);
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -140,21 +145,32 @@
             border-radius: var(--radius-pill);
             background: transparent; border: none;
             cursor: pointer;
-            transition: all 0.4s var(--ease-out-expo);
-            position: relative; }
+            transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+            position: relative; 
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin: 0;
+        }
         .nav-pill a::after, .nav-pill button::after {
             content: ''; position: absolute; top: -8px; left: -8px; right: -8px; bottom: -8px; z-index: -1; }
         .nav-pill a:focus-visible, .nav-pill button:focus-visible, .nav-pill a:active, .nav-pill button:active {
-            background: var(--plasma); color: var(--void);
-            box-shadow: 0 0 20px rgba(204, 255, 0, 0.3);
+            background: linear-gradient(180deg, #e5ff66 0%, var(--plasma) 100%); 
+            color: var(--void);
+            box-shadow: 0 0 20px rgba(204, 255, 0, 0.3), inset 0 1px 1px rgba(255,255,255,0.8), inset 0 -2px 4px rgba(204, 255, 0, 0.4);
             outline: none;
-            transform: scale(1.02); }
+            text-shadow: none;
+        }
         @media (hover: hover) {
             .nav-pill a:hover, .nav-pill button:hover {
-                background: var(--plasma); color: var(--void);
-                box-shadow: 0 0 20px rgba(204, 255, 0, 0.3);
+                background: linear-gradient(180deg, #e5ff66 0%, var(--plasma) 100%); 
+                color: var(--void);
+                box-shadow: 0 0 20px rgba(204, 255, 0, 0.3), inset 0 1px 1px rgba(255,255,255,0.8), inset 0 -2px 4px rgba(204, 255, 0, 0.4);
                 outline: none;
-                transform: scale(1.02); }
+                text-shadow: none;
+            }
         }
         
         /* --- LAYOUT GRIDS --- */
@@ -298,6 +314,22 @@
             touch-action: pan-y;
             user-select: none;
             padding: 96px max(32px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(32px, env(safe-area-inset-left));
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        .drawer-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .drawer-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .drawer-scroll::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-pill);
+        }
+        .drawer-scroll::-webkit-scrollbar-thumb:active {
+            background-color: var(--plasma);
         }
 
         .drawer-scroll p,
@@ -315,11 +347,6 @@
         .drawer-scroll .archive-list li a,
         .drawer-scroll .btn-primary {
             -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none !important;
-            user-select: none !important;
-            -webkit-user-drag: none !important;
-            -webkit-touch-callout: none !important;
-            touch-action: pan-y !important;
             cursor: pointer;
         }
 
@@ -470,7 +497,15 @@
 
         @media (max-width: 539px) {
             .nav-pill { top: max(12px, env(safe-area-inset-top)); gap: 4px; padding: 6px; max-width: calc(100% - 24px); }
-            .nav-pill a, .nav-pill button { font-size: 11px; padding: 14px 18px; letter-spacing: 0.08em; min-height: 44px; display: inline-flex; align-items: center; }
+            .nav-pill a, .nav-pill button { 
+                font-size: 11px; 
+                padding: 0 18px; 
+                letter-spacing: 0.08em; 
+                height: 44px; 
+                display: inline-flex; 
+                align-items: center; 
+                justify-content: center; 
+            }
             section { padding: 80px 0; }
             .lead-text { font-size: clamp(26px, 7vw, 32px); line-height: 1.25; margin-bottom: 24px; }
             .body-text { font-size: 16px; line-height: 1.6; margin-bottom: 24px; }
