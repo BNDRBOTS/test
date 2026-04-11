@@ -12,24 +12,6 @@
         /* --- RESET & TOKENS --- */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
         
-        /* Base interaction resets */
-        a, button, summary, img { 
-            touch-action: manipulation; 
-            -webkit-user-drag: none; 
-        }
-        input, textarea { touch-action: manipulation; }
-
-        /* Mobile Touch Targets */
-        @media (pointer: coarse) {
-            .connect-btn, .footer-policy-links a, .footer-links a:not(.connect-btn), 
-            .nav-pill a, .nav-pill button, .drawer-close, .modal-close,
-            button.section-badge {
-                min-height: 44px !important;
-                display: inline-flex;
-                align-items: center;
-            }
-        }
-
         :root {
             --bone: #E8E4DF;       
             --void: #020202;       
@@ -320,16 +302,16 @@
             -webkit-backdrop-filter: blur(8px);
             z-index: 1400; opacity: 0; pointer-events: none; transition: opacity 0.5s var(--ease-premium);
         }
-        .drawer-overlay.active { opacity: 1; pointer-events: auto; touch-action: none; }
+        .drawer-overlay.active { opacity: 1; pointer-events: auto; }
         
         .drawer {
             position: fixed; 
-            inset: 0 0 0 auto;
+            top: 0; right: 0; bottom: 0; /* Forces full height relative to bounds */
             width: 100%; max-width: 520px;
             background: rgba(10, 10, 11, 0.85);
             backdrop-filter: blur(32px) saturate(180%);
             -webkit-backdrop-filter: blur(32px) saturate(180%);
-            z-index: 1500; overflow: hidden; display: flex; flex-direction: column;
+            z-index: 1500; overflow: hidden; display: block;
             transform: translateX(100%); transition: transform 0.6s var(--ease-premium);
             border-left: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--bone);
@@ -338,23 +320,11 @@
         }
 
         .drawer-scroll {
-            flex: 1 1 auto;
-            min-height: 0;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            overscroll-behavior-y: contain;
-            user-select: none;
-            padding: 96px max(32px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(32px, env(safe-area-inset-left));
-        }
-
-        .drawer-scroll p,
-        .drawer-scroll li,
-        .drawer-scroll h2,
-        .drawer-scroll h3,
-        .drawer-scroll .lead-text,
-        .drawer-scroll .body-text {
-            user-select: text;
-            -webkit-touch-callout: default;
+            padding: max(64px, env(safe-area-inset-top, 64px)) 32px max(64px, env(safe-area-inset-bottom, 64px)) 32px;
         }
 
         .drawer.active { transform: translateX(0); }
@@ -374,14 +344,14 @@
         @media (hover: hover) { .drawer-close:hover { opacity: 1; color: var(--plasma); transform: rotate(90deg); background: rgba(255, 255, 255, 0.15); } }
         
         /* --- PRICING CARDS --- */
-        .pricing-drawer-grid { display: grid; gap: 28px; align-items: stretch; }
+        .pricing-drawer-grid { display: flex; flex-direction: column; gap: 28px; }
         .pricing-card-mini {
             background: rgba(2, 2, 2, 0.6); color: var(--bone); padding: 32px; border-radius: 16px;
             border: 1px solid rgba(255,255,255,0.12); position: relative; 
             z-index: 1;
             transition: border-color 0.4s var(--ease-premium), background-color 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium);
             box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 40px -10px rgba(0,0,0,0.5);
-            height: 100%; display: flex; flex-direction: column;
+            display: flex; flex-direction: column;
         }
         @media (hover: hover) { .pricing-card-mini:hover { border-color: rgba(255,255,255,0.3); background: rgba(10, 10, 11, 0.85); } }
         .pricing-card-mini.tier-special { border-color: rgba(255, 0, 85, 0.6); box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 16px 40px rgba(255, 0, 85, 0.15); }
@@ -413,14 +383,14 @@
         .pricing-card-mini.tier-special .feature-list li::before { color: var(--magenta); }
         
         /* --- ARCHIVE CARDS --- */
-        .archive-drawer-grid { display: grid; gap: 28px; align-items: stretch; }
+        .archive-drawer-grid { display: flex; flex-direction: column; gap: 28px; }
         .archive-category {
             background: rgba(2, 2, 2, 0.6); color: var(--bone); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 32px;
             position: relative; 
             z-index: 1; 
             transition: border-color 0.4s var(--ease-premium), background-color 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium);
             box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 40px -10px rgba(0,0,0,0.5);
-            height: 100%; display: flex; flex-direction: column;
+            display: flex; flex-direction: column;
         }
         @media (hover: hover) { .archive-category:hover { border-color: rgba(255,255,255,0.3); background: rgba(10, 10, 11, 0.85); } }
         .archive-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
@@ -429,8 +399,6 @@
             text-decoration: none; font-size: 15px; font-weight: 500; padding: 14px 0;
             border-bottom: 1px solid rgba(255,255,255,0.06); transition: all 0.3s var(--ease-premium); position: relative;
             min-height: 48px;
-            user-select: none;
-            -webkit-user-select: none;
         }
         .archive-list li a::after { content: '↗'; font-size: 13px; color: var(--plasma); opacity: 0; transform: translateX(-16px); transition: all 0.4s var(--ease-premium); }
         
@@ -544,7 +512,7 @@
                 -webkit-backdrop-filter: blur(24px) saturate(180%);
             }
             .drawer-scroll {
-                padding: max(48px, env(safe-area-inset-top, 48px)) 24px max(64px, env(safe-area-inset-bottom)) 24px;
+                padding: max(48px, env(safe-area-inset-top, 48px)) 24px max(64px, env(safe-area-inset-bottom, 64px)) 24px;
             }
             .drawer-header-margin { margin-bottom: 24px; }
             .drawer-close {
@@ -562,7 +530,6 @@
                 padding: 32px 24px;
                 border-radius: 20px;
                 background: rgba(2, 2, 2, 0.4);
-                height: auto;
             }
             .archive-list li a {
                 padding: 16px 8px;
@@ -970,7 +937,6 @@
         }, observerOptions);
         document.querySelectorAll('.io-target').forEach(el => observer.observe(el));
         
-        // Prevents background from scrolling when touching the black overlay on older iOS versions
         document.getElementById('drawer-overlay').addEventListener('touchmove', (e) => {
             e.preventDefault();
         }, { passive: false });
@@ -1001,6 +967,8 @@
                     document.getElementById('drawer-overlay').classList.add('active');
                 }
                 
+                document.body.style.overflow = 'hidden';
+                
                 flashSystem();
                 const firstFocusable = this.activeSurface.querySelector('button, input, textarea, a');
                 if (firstFocusable) {
@@ -1013,6 +981,8 @@
                 if (this.activeSurface.classList.contains('drawer')) {
                     document.getElementById('drawer-overlay').classList.remove('active');
                 }
+                
+                document.body.style.overflow = '';
                 
                 if (this.lastFocus && this.lastFocus.setAttribute) {
                     this.lastFocus.setAttribute('aria-expanded', 'false');
@@ -1315,9 +1285,13 @@
             if (e.touches.length === 1) startDrag(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive: true });
         window.addEventListener('touchmove', e => {
+            if(e.target.closest('button, a, input, textarea, details, .glass-panel, .drawer, .modal-overlay')) return;
             if (e.touches.length === 1) trackDrag(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive: true });
-        window.addEventListener('touchend', endDrag);
+        window.addEventListener('touchend', e => {
+            if(e.target.closest('button, a, input, textarea, details, .glass-panel, .drawer, .modal-overlay')) return;
+            endDrag();
+        });
         
         function gyroHandler(e) {
             if (!e.beta || !e.gamma) return;
